@@ -6,12 +6,20 @@
     {
       "src": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
       "type": "image/svg+xml",
-      "sizes": "any"
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "https://ryou0903.github.io/Nano-Studio/?source=pwa",
-  "scope": "https://ryou0903.github.io/Nano-Studio/",
+  "start_url": "./index.html?source=pwa",
+  "scope": "/Nano-Studio/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#09090b",
   "background_color": "#09090b",
   "orientation": "portrait"

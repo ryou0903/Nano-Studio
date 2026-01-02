@@ -1,8 +1,10 @@
-// Nano Studio Service Worker v5 (Offline Capable)
-const CACHE_NAME = 'nano-studio-v5';
+// Nano Studio Service Worker v6 (Strict Offline)
+const CACHE_NAME = 'nano-studio-v6';
 const SCOPE = '/Nano-Studio/';
+const INDEX_HTML_URL = SCOPE + 'index.html';
+
 const PRECACHE_URLS = [
-  SCOPE + 'index.html',
+  INDEX_HTML_URL,
   SCOPE + 'manifest.json'
 ];
 
@@ -22,7 +24,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
         })
@@ -34,33 +35,35 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Redirect stray 'assets/index.html' requests to root
+  // 1. Rescue: Redirect stray 'assets/index.html' requests to root
   if (url.pathname.includes('/assets/index.html')) {
     event.respondWith(Response.redirect(SCOPE, 301));
     return;
   }
 
-  // 2. Handle Navigation Requests (HTML)
+  // 2. Navigation Requests (The "App Shell")
+  // If it's a page load, we MUST return index.html to satisfy PWA criteria,
+  // even if offline or if URL has query params like ?source=pwa
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          // If network fails (offline), return the cached index.html
-          // This satisfies Chrome's PWA installation criteria for WebAPK
-          return caches.match(SCOPE + 'index.html');
-        })
+      fetch(event.request).catch(() => {
+        // Network failed (Offline). Return the cached index.html explicitly.
+        // We ignore the actual URL params and serve the shell.
+        return caches.match(INDEX_HTML_URL).then(response => {
+            if (response) return response;
+            // Fallback for extreme edge cases
+            return new Response("Offline. Please reload.", { headers: { "Content-Type": "text/plain" } });
+        });
+      })
     );
     return;
   }
 
-  // 3. Handle Static Assets & Other Requests
+  // 3. Static Assets (Images, Scripts)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       // Return cached response if found, otherwise fetch from network
-      return cachedResponse || fetch(event.request).then((response) => {
-        // Optionally cache new requests dynamically here if needed
-        return response;
-      });
+      return cachedResponse || fetch(event.request);
     })
   );
 });
