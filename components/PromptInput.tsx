@@ -16,6 +16,56 @@ const PromptInput: React.FC<PromptInputProps> = ({ isVisible, onGenerate, isGene
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Keyboard & Layout State
+  const [visualViewportOffset, setVisualViewportOffset] = useState(0);
+  
+  // Interaction Guard (Ghost Click Prevention)
+  const [isReadyForInteraction, setIsReadyForInteraction] = useState(false);
+
+  // 1. Ghost Click Prevention: Delay interaction enablement
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    if (isVisible) {
+        // Wait 300ms after becoming visible before accepting pointer events.
+        // This ensures the tap on the FAB doesn't bleed through to buttons here.
+        timeout = setTimeout(() => setIsReadyForInteraction(true), 300);
+    } else {
+        setIsReadyForInteraction(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [isVisible]);
+
+  // 2. Robust Keyboard Handling (Visual Viewport API)
+  useEffect(() => {
+    const handleResize = () => {
+        if (!window.visualViewport) return;
+        
+        // Calculate the gap between the layout viewport bottom and the visual viewport bottom.
+        // This gap represents the keyboard height (or other overlays) in browsers that don't resize the layout viewport.
+        const layoutHeight = window.innerHeight;
+        const visualHeight = window.visualViewport.height;
+        const offsetTop = window.visualViewport.offsetTop;
+        
+        // layoutHeight - (visualHeight + offsetTop) gives the amount of space covered at the bottom.
+        // We use Math.max to avoid negative values in some bounce effects.
+        const bottomGap = layoutHeight - (visualHeight + offsetTop);
+        setVisualViewportOffset(Math.max(0, bottomGap));
+    };
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleResize);
+        window.visualViewport.addEventListener('scroll', handleResize);
+        // Initial calculation
+        handleResize();
+    }
+    return () => {
+        if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', handleResize);
+            window.visualViewport.removeEventListener('scroll', handleResize);
+        }
+    };
+  }, []);
+
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
@@ -83,12 +133,17 @@ const PromptInput: React.FC<PromptInputProps> = ({ isVisible, onGenerate, isGene
 
   return (
     <div 
-        className={`fixed z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] right-0 bottom-0 left-0 p-4 ${
+        className={`fixed z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] right-0 left-0 p-4 ${
           isVisible 
-            ? 'opacity-100 translate-y-0 pointer-events-auto visible' 
-            : 'opacity-0 translate-y-full pointer-events-none invisible'
-        }`}
-        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+            ? 'opacity-100 translate-y-0 visible' 
+            : 'opacity-0 translate-y-full invisible'
+        } ${isReadyForInteraction ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        style={{ 
+            // Dynamically adjust bottom based on visual viewport (keyboard)
+            bottom: `${visualViewportOffset}px`,
+            // Add safe area padding
+            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' 
+        }}
     >
       <form 
         onSubmit={handleSubmit} 
