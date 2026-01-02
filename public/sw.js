@@ -1,9 +1,19 @@
-// Nano Studio Service Worker v4 (Rescue Mode)
-const CACHE_NAME = 'nano-studio-v4';
+// Nano Studio Service Worker v5 (Offline Capable)
+const CACHE_NAME = 'nano-studio-v5';
 const SCOPE = '/Nano-Studio/';
+const PRECACHE_URLS = [
+  SCOPE + 'index.html',
+  SCOPE + 'manifest.json'
+];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Precaching core assets');
+      return cache.addAll(PRECACHE_URLS);
+    })
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -11,8 +21,10 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
         })
       );
     }).then(() => self.clients.claim())
@@ -22,30 +34,33 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // --- CRITICAL FIX FOR WHITE SCREEN ---
-  // If the device tries to load the non-existent 'assets/index.html',
-  // we intercept it and redirect to the root.
+  // 1. Redirect stray 'assets/index.html' requests to root
   if (url.pathname.includes('/assets/index.html')) {
-    console.log('Redirecting stray request from assets/index.html to root');
     event.respondWith(Response.redirect(SCOPE, 301));
     return;
   }
 
-  // For main navigation requests (opening the app), prioritize network
-  // but fall back to the root index.html if it fails (SPA support).
+  // 2. Handle Navigation Requests (HTML)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return fetch(SCOPE + 'index.html');
-      })
+      fetch(event.request)
+        .catch(() => {
+          // If network fails (offline), return the cached index.html
+          // This satisfies Chrome's PWA installation criteria for WebAPK
+          return caches.match(SCOPE + 'index.html');
+        })
     );
     return;
   }
 
-  // Default network-first strategy
+  // 3. Handle Static Assets & Other Requests
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      // Return cached response if found, otherwise fetch from network
+      return cachedResponse || fetch(event.request).then((response) => {
+        // Optionally cache new requests dynamically here if needed
+        return response;
+      });
     })
   );
 });
