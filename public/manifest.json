@@ -8,7 +8,8 @@
       "sizes": "any"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "/Nano-Studio/?mode=pwa",
+  "scope": "/Nano-Studio/",
   "display": "standalone",
   "theme_color": "#09090b",
   "background_color": "#09090b",

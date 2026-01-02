@@ -1,21 +1,34 @@
-// Nano Studio Service Worker
-const CACHE_NAME = 'nano-studio-v1';
+// Nano Studio Service Worker v2
+const CACHE_NAME = 'nano-studio-v2';
 
 // Install event: Skip waiting to activate immediately
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event: Claim clients immediately to control the page
+// Activate event: Clear old caches and claim clients
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-// Fetch event: Basic passthrough. 
-// For a robust offline PWA, we would cache assets here.
-// For now, we ensure requests are handled to prevent PWA crash on startup.
+// Fetch event: Network first, fall back to nothing (for now) to avoid stale cache issues
+// This ensures that if index.html or js files change, we get them fresh.
 self.addEventListener('fetch', (event) => {
-  // We can add caching logic here in the future.
-  // Currently allowing network-first to ensure API calls work.
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+        // Optional: return offline page if needed
+        // return caches.match(event.request);
+    })
+  );
 });
