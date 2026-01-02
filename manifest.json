@@ -8,7 +8,8 @@
       "sizes": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "theme_color": "#09090b",
   "background_color": "#09090b",

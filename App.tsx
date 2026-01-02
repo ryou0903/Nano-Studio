@@ -504,7 +504,7 @@ function App() {
   const currentChatSession = chatSessions.find(s => s.id === currentSessionId);
 
   return (
-    <div className="min-h-screen bg-background text-white font-sans overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-background text-white font-sans overflow-x-hidden">
       
       {/* Toast */}
       {errorToast && (
@@ -537,7 +537,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <main className={`transition-all duration-500 max-w-7xl mx-auto min-h-screen ${mode === AppMode.GALLERY ? 'pt-20 px-2' : ''}`}>
+      <main className={`transition-all duration-500 max-w-7xl mx-auto min-h-[100dvh] ${mode === AppMode.GALLERY ? 'pt-20 px-2' : ''}`}>
          {mode === AppMode.GALLERY ? (
              <GalleryGrid 
                 images={images}
