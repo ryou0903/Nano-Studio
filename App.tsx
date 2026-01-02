@@ -583,8 +583,8 @@ function App() {
             // Clicking outside the input box (the overlay) closes the input
             onClick={(e) => {
                 // Prevent ghost clicks from immediately closing the overlay
-                // If this click happens within 300ms of opening, ignore it
-                if (Date.now() - inputOpenTimeRef.current < 300) return;
+                // If this click happens within 500ms of opening, ignore it
+                if (Date.now() - inputOpenTimeRef.current < 500) return;
 
                 // If it's a direct click on the overlay, close input
                 if (e.target === e.currentTarget) {

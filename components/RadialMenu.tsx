@@ -50,6 +50,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressRef = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const wasLongPressRef = useRef(false);
 
   // Helper to handle navigation and input toggling
   const handleNav = (targetMode: AppMode) => {
@@ -190,17 +191,21 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   // --- Handlers ---
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault(); // Prevent default touch actions
-    e.stopPropagation(); // Stop propagation
-
+    // Only capture left click or touch
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     
-    isLongPressRef.current = false;
+    // Do NOT prevent default here, or click won't fire.
+    // We only prevent default if we confirm it's a long press later.
+    
     const target = e.currentTarget as HTMLElement;
     target.setPointerCapture(e.pointerId);
 
+    isLongPressRef.current = false;
+    wasLongPressRef.current = false;
+
     longPressTimerRef.current = setTimeout(() => {
         isLongPressRef.current = true;
+        wasLongPressRef.current = true;
         setIsOpen(true);
     }, 200);
   };
@@ -226,9 +231,6 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
     if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
     }
@@ -238,7 +240,12 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     } catch (err) {}
 
     if (isLongPressRef.current) {
-        // Was dragging
+        // It WAS a long press / drag.
+        // Prevent the default click that follows this pointerup
+        // Note: e.preventDefault() here might not stop the 'click' event in all browsers if pointerdown wasn't prevented,
+        // but since we handled the action, we should try.
+        // Actually, we can rely on `wasLongPressRef` in the click handler.
+        
         if (hoveredItemId) {
             // Released over an item -> Execute
             const item = items.find(i => i.id === hoveredItemId);
@@ -247,32 +254,37 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
             }
         }
         setIsOpen(false); // Close menu after drag
-    } else {
-        // Was a short tap. 
-        // We do NOT handle the click here to avoid double-firing if a native click follows.
-        // But if the native click DOESN'T fire (e.g. because we did preventDefault), we must handle it here or in onClick.
-        // Since we did e.preventDefault(), the 'click' event might be suppressed on some browsers.
-        // However, to be safe and consistent, we'll manually trigger click logic here if it's NOT a long press,
-        // and rely on the fact that we stopped propagation.
-        
-        if (isOpen) {
-            setIsOpen(false);
-        } else {
-             handleClick();
-        }
-    }
+    } 
+    // If it was NOT a long press, we do NOTHING here.
+    // We let the browser fire the 'click' event naturally.
     
     setHoveredItemId(null);
     isLongPressRef.current = false;
   };
 
-  const handleClick = () => {
-      // Short Press Logic
-      if (selectionMode) {
-          if (hasSelection) onDownload();
-          else onCancelSelection();
+  const handleClick = (e: React.MouseEvent) => {
+      // If it was a long press operation, we ignore the click
+      if (wasLongPressRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          wasLongPressRef.current = false;
+          return;
+      }
+
+      // Short Press Logic (Standard Click)
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (isOpen) {
+        setIsOpen(false);
       } else {
-          onToggleInput();
+        // Execute main action
+        if (selectionMode) {
+            if (hasSelection) onDownload();
+            else onCancelSelection();
+        } else {
+            onToggleInput();
+        }
       }
   };
 
@@ -367,12 +379,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
-                onClick={(e) => { 
-                    // We handle click logic in pointerUp/pointerDown to distinguish long press.
-                    // Just prevent default here to avoid double firing if the browser decides to fire click anyway.
-                    e.preventDefault(); 
-                    e.stopPropagation(); 
-                }}
+                onClick={handleClick}
                 onContextMenu={(e) => e.preventDefault()}
                 style={{ touchAction: 'none' }}
                 className={`relative z-30 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90 ${mainBtnBg}`}
