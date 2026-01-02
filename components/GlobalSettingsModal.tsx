@@ -1,22 +1,30 @@
-import React from 'react';
-import { X, Trash2, KeyRound, Database, Info, AlertTriangle } from 'lucide-react';
-import * as db from '../services/db';
+import React, { useState, useEffect } from 'react';
+import { X, Trash2, KeyRound, Database, Info, Eye, EyeOff, Save } from 'lucide-react';
 
 interface GlobalSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onResetApiKey: () => void;
   onClearImages: () => Promise<void>;
   onClearChats: () => Promise<void>;
+  currentApiKey: string;
+  onSaveApiKey: (key: string) => void;
 }
 
 const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({ 
   isOpen, 
   onClose, 
-  onResetApiKey,
   onClearImages,
-  onClearChats
+  onClearChats,
+  currentApiKey,
+  onSaveApiKey
 }) => {
+  const [keyInput, setKeyInput] = useState(currentApiKey);
+  const [showKey, setShowKey] = useState(false);
+
+  useEffect(() => {
+      setKeyInput(currentApiKey);
+  }, [currentApiKey, isOpen]);
+
   if (!isOpen) return null;
 
   const handleClearImages = async () => {
@@ -33,6 +41,11 @@ const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
       }
   };
 
+  const handleSaveKey = () => {
+      onSaveApiKey(keyInput);
+      alert("APIキーを保存しました。");
+  };
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-surface w-full max-w-md rounded-2xl border border-white/10 p-6 space-y-6 animate-slide-up shadow-2xl">
@@ -44,6 +57,47 @@ const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
           <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">
             <X size={20} className="text-white/70" />
           </button>
+        </div>
+
+        {/* Account / API Key */}
+        <div className="space-y-4">
+             <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">APIキー設定</h3>
+             <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                    <KeyRound size={16} className="text-primary" />
+                    <span className="text-sm font-medium text-white">Google Gemini API Key</span>
+                </div>
+                <div className="relative">
+                    <input 
+                        type={showKey ? "text" : "password"}
+                        value={keyInput}
+                        onChange={(e) => setKeyInput(e.target.value)}
+                        placeholder="AIzaSy..."
+                        className="w-full bg-black/30 border border-white/10 rounded-lg py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-primary/50"
+                    />
+                    <button 
+                        onClick={() => setShowKey(!showKey)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                    >
+                        {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                </div>
+                <div className="flex justify-end">
+                    <button 
+                        onClick={handleSaveKey}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-colors"
+                    >
+                        <Save size={14} /> 保存
+                    </button>
+                </div>
+                <p className="text-[10px] text-white/30 leading-relaxed">
+                    キーはブラウザにのみ保存され、外部に送信されることはありません。
+                    <br />
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                        Google AI Studioでキーを取得
+                    </a>
+                </p>
+             </div>
         </div>
 
         {/* Data Management */}
@@ -76,26 +130,6 @@ const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                     <div className="text-left">
                         <div className="font-medium text-white group-hover:text-red-400">チャット履歴を削除</div>
                         <div className="text-xs text-white/40">保存されたすべての会話を消去します</div>
-                    </div>
-                </div>
-            </button>
-        </div>
-
-        {/* Account / System */}
-        <div className="space-y-4">
-             <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">システム</h3>
-
-             <button 
-                onClick={() => { onClose(); onResetApiKey(); }}
-                className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-white/10 text-primary">
-                        <KeyRound size={18} />
-                    </div>
-                    <div className="text-left">
-                        <div className="font-medium text-white">APIキーの再選択</div>
-                        <div className="text-xs text-white/40">別のアカウントに切り替える場合など</div>
                     </div>
                 </div>
             </button>

@@ -15,12 +15,12 @@ import ImageViewer from './components/ImageViewer';
 import ChatInterface from './components/ChatInterface';
 import ChatHistory from './components/ChatHistory';
 
-import { Loader2, KeyRound, AlertCircle, XCircle } from 'lucide-react';
+import { Loader2, KeyRound, AlertCircle, XCircle, Sparkles, ArrowRight } from 'lucide-react';
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
 function App() {
-  const [hasApiKey, setHasApiKey] = useState(false);
+  const [apiKey, setApiKey] = useState<string>('');
   const [mode, setMode] = useState<AppMode>(AppMode.GENERATE);
   
   // Image State
@@ -51,6 +51,9 @@ function App() {
   const [isChatSettingsOpen, setIsChatSettingsOpen] = useState(false); // Chat Settings
   const [isGlobalSettingsOpen, setIsGlobalSettingsOpen] = useState(false); // Global Settings
 
+  // Welcome Screen Input
+  const [welcomeInputKey, setWelcomeInputKey] = useState('');
+
   const [genSettings, setGenSettings] = useState<GenSettings>({
     model: ModelType.PRO,
     aspectRatio: '1:1',
@@ -75,8 +78,7 @@ function App() {
 
   // --- Initialization ---
   useEffect(() => {
-    checkApiKey();
-    loadData();
+    initialize();
   }, []);
 
   // Update input visibility on mode change
@@ -88,14 +90,45 @@ function App() {
       }
   }, [mode]);
 
-  const checkApiKey = async () => {
+  const initialize = async () => {
+    await loadApiKey();
+    await loadData();
+    setLoading(false);
+  };
+
+  const loadApiKey = async () => {
+    // 1. Try Local Storage
+    const storedKey = localStorage.getItem('nano_studio_api_key');
+    if (storedKey) {
+        setApiKey(storedKey);
+        return;
+    }
+
+    // 2. Try Process Env (Fallback/Dev)
+    if (process.env.API_KEY) {
+        setApiKey(process.env.API_KEY);
+        return;
+    }
+
+    // 3. Try Window global (Legacy/IDX)
     const win = window as any;
     if (win.aistudio) {
-      const has = await win.aistudio.hasSelectedApiKey();
-      setHasApiKey(has);
-    } else {
-      setHasApiKey(true); 
+        try {
+            const has = await win.aistudio.hasSelectedApiKey();
+            if (has) {
+                // We can't easily extract the string from aistudio object if not exposed,
+                // but usually process.env.API_KEY is populated if hasSelectedApiKey is true in IDX.
+                // If we are here, it means process.env.API_KEY was empty.
+                // We might need to ask user to select key again to populate env?
+                // For now, let's assume if process.env.API_KEY is missing, we need manual input.
+            }
+        } catch (e) {}
     }
+  };
+
+  const saveApiKey = (key: string) => {
+      localStorage.setItem('nano_studio_api_key', key);
+      setApiKey(key);
   };
 
   const loadData = async () => {
@@ -107,8 +140,6 @@ function App() {
       setChatSessions(storedChats);
     } catch (e) {
       console.error("Failed to load data", e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -120,18 +151,6 @@ function App() {
   };
 
   // --- Actions ---
-
-  const handleConnectKey = async () => {
-    const win = window as any;
-    if (win.aistudio) {
-      try {
-        await win.aistudio.openSelectKey();
-        setHasApiKey(true);
-      } catch (e) {
-        console.error("Key selection failed", e);
-      }
-    }
-  };
 
   const handleSwitchMode = (newMode: AppMode) => {
     setMode(newMode);
@@ -172,7 +191,7 @@ function App() {
     }, intervalMs);
 
     try {
-      const base64Images = await gemini.generateImage(prompt, genSettings, referenceImages);
+      const base64Images = await gemini.generateImage(prompt, genSettings, referenceImages, apiKey);
       
       clearInterval(progressInterval);
       
@@ -291,6 +310,7 @@ function App() {
               attachments,      // Attachments
               chatSettings,
               sysPromptContent,
+              apiKey,
               (chunk) => {
                   modelTextAccumulator += chunk;
                   setIsChatThinking(false); // Stop thinking visual once first token arrives
@@ -321,7 +341,7 @@ function App() {
           
           // Generate Title if new
           if (isNewSession) {
-              const title = await gemini.generateChatTitle(prompt);
+              const title = await gemini.generateChatTitle(prompt, apiKey);
               finalSession.title = title;
           }
 
@@ -424,19 +444,59 @@ function App() {
     );
   }
 
-  // API Key Screen
-  const win = window as any;
-  if (!hasApiKey && win.aistudio) {
+  // Welcome / API Key Screen
+  if (!apiKey) {
     return (
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-8 animate-fade-in">
-             <div className="space-y-4">
-                <KeyRound size={40} className="text-primary mx-auto" />
-                <h1 className="text-3xl font-bold text-white">Nano Studio</h1>
-                <p className="text-white/50">APIキーを接続してください。</p>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 animate-fade-in relative overflow-hidden">
+             {/* Background Decoration */}
+             <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+             <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+
+             <div className="max-w-md w-full space-y-8 z-10">
+                <div className="text-center space-y-2">
+                    <div className="w-20 h-20 bg-gradient-to-tr from-primary to-purple-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl mb-6">
+                        <Sparkles size={40} className="text-white" />
+                    </div>
+                    <h1 className="text-4xl font-bold text-white tracking-tight">Nano Studio</h1>
+                    <p className="text-white/50 text-lg">Your Personal AI Creative Suite</p>
+                </div>
+
+                <div className="bg-surface/50 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-xl space-y-6">
+                    <div className="space-y-4">
+                        <label className="block text-sm font-medium text-white/80">APIキーを入力してください</label>
+                        <div className="space-y-2">
+                            <input 
+                                type="password" 
+                                placeholder="AIzaSy..." 
+                                value={welcomeInputKey}
+                                onChange={(e) => setWelcomeInputKey(e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder-white/20"
+                            />
+                            <p className="text-xs text-white/40 leading-relaxed">
+                                キーは端末内（ローカルストレージ）にのみ保存され、外部サーバーには送信されません。
+                            </p>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => saveApiKey(welcomeInputKey)}
+                        disabled={!welcomeInputKey}
+                        className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                            welcomeInputKey 
+                            ? 'bg-white text-black hover:scale-[1.02] shadow-lg shadow-white/10' 
+                            : 'bg-white/5 text-white/20 cursor-not-allowed'
+                        }`}
+                    >
+                        始める <ArrowRight size={18} />
+                    </button>
+                    
+                    <div className="pt-4 border-t border-white/5 text-center">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-primary text-sm hover:underline inline-flex items-center gap-1">
+                            APIキーを取得 <ArrowRight size={12} />
+                        </a>
+                    </div>
+                </div>
              </div>
-             <button onClick={handleConnectKey} className="px-8 py-3 bg-white text-black font-bold rounded-full">
-                APIキーを選択
-             </button>
         </div>
     );
   }
@@ -583,9 +643,10 @@ function App() {
       <GlobalSettingsModal 
         isOpen={isGlobalSettingsOpen}
         onClose={() => setIsGlobalSettingsOpen(false)}
-        onResetApiKey={handleConnectKey}
         onClearImages={handleClearImages}
         onClearChats={handleClearChats}
+        currentApiKey={apiKey}
+        onSaveApiKey={saveApiKey}
       />
 
       <ImageViewer 

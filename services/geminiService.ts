@@ -6,10 +6,11 @@ import { GenSettings, ModelType, ChatSettings, ChatMessage } from "../types";
 export const generateImage = async (
   prompt: string,
   settings: GenSettings,
-  referenceImages: string[] = []
+  referenceImages: string[] = [],
+  apiKey: string
 ): Promise<string[]> => {
-  // NOTE: process.env.API_KEY is injected by the environment
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  if (!apiKey) throw new Error("API Key is required");
+  const ai = new GoogleGenAI({ apiKey });
 
   try {
     const images: string[] = [];
@@ -121,10 +122,12 @@ export const streamChatResponse = async (
     newMessage: string,
     attachments: string[],
     settings: ChatSettings,
-    systemInstruction?: string,
+    systemInstruction: string | undefined,
+    apiKey: string,
     onChunk?: (text: string) => void
 ): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    if (!apiKey) throw new Error("API Key is required");
+    const ai = new GoogleGenAI({ apiKey });
     
     // Prepare Config
     const config: any = {};
@@ -220,8 +223,9 @@ export const streamChatResponse = async (
     }
 };
 
-export const generateChatTitle = async (firstMessage: string): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+export const generateChatTitle = async (firstMessage: string, apiKey: string): Promise<string> => {
+    if (!apiKey) return "New Conversation";
+    const ai = new GoogleGenAI({ apiKey });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',

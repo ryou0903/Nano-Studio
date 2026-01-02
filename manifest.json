@@ -1,0 +1,16 @@
+{
+  "short_name": "Nano Studio",
+  "name": "Nano Studio AI",
+  "icons": [
+    {
+      "src": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
+  "orientation": "portrait"
+}

@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Nano Studio</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#09090b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nano Studio" />
+    <link rel="apple-touch-icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -53,6 +62,7 @@
         background-color: #09090b;
         color: #ffffff;
         -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: none; /* Prevent bounce effect on mobile */
       }
       /* Markdown Styles */
       .prose p { margin-bottom: 0.75em; }
