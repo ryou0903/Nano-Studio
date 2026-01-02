@@ -8,8 +8,8 @@
       "sizes": "any"
     }
   ],
-  "start_url": "/Nano-Studio/index.html",
-  "scope": "/Nano-Studio/",
+  "start_url": "https://ryou0903.github.io/Nano-Studio/?source=pwa",
+  "scope": "https://ryou0903.github.io/Nano-Studio/",
   "display": "standalone",
   "theme_color": "#09090b",
   "background_color": "#09090b",

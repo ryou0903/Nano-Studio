@@ -1,34 +1,51 @@
-// Nano Studio Service Worker v3
-const CACHE_NAME = 'nano-studio-v3';
+// Nano Studio Service Worker v4 (Rescue Mode)
+const CACHE_NAME = 'nano-studio-v4';
+const SCOPE = '/Nano-Studio/';
 
-// Install event: Skip waiting to activate immediately
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event: Clear old caches and claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
-          }
         })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event: Network first
-// This ensures that if index.html or js files change, we get them fresh.
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // --- CRITICAL FIX FOR WHITE SCREEN ---
+  // If the device tries to load the non-existent 'assets/index.html',
+  // we intercept it and redirect to the root.
+  if (url.pathname.includes('/assets/index.html')) {
+    console.log('Redirecting stray request from assets/index.html to root');
+    event.respondWith(Response.redirect(SCOPE, 301));
+    return;
+  }
+
+  // For main navigation requests (opening the app), prioritize network
+  // but fall back to the root index.html if it fails (SPA support).
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return fetch(SCOPE + 'index.html');
+      })
+    );
+    return;
+  }
+
+  // Default network-first strategy
   event.respondWith(
     fetch(event.request).catch(() => {
-        // Optional: return offline page if needed
-        // return caches.match(event.request);
+      return caches.match(event.request);
     })
   );
 });
