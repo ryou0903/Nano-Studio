@@ -47,6 +47,7 @@ function App() {
   const [isInputVisible, setIsInputVisible] = useState(false);
   // Ref to track when input was opened to prevent immediate closing by ghost clicks
   const inputOpenTimeRef = useRef<number>(0);
+  const lastToggleTimeRef = useRef<number>(0);
   
   // Settings
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Image Settings
@@ -608,9 +609,13 @@ function App() {
         mode={mode}
         onSwitchMode={handleSwitchMode}
         onToggleInput={() => {
+            const now = Date.now();
+            if (now - lastToggleTimeRef.current < 500) return; // Debounce 500ms
+            lastToggleTimeRef.current = now;
+
             if (!isInputVisible) {
                 // Mark the time we opened it
-                inputOpenTimeRef.current = Date.now();
+                inputOpenTimeRef.current = now;
             }
             setIsInputVisible(!isInputVisible);
         }}
