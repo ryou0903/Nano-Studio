@@ -83,16 +83,21 @@ const PromptInput: React.FC<PromptInputProps> = ({ isVisible, onGenerate, isGene
 
   return (
     <div 
-        className={`fixed z-50 transition-all duration-300 ease-in-out right-4 bottom-4 left-4 ${
+        className={`fixed z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] right-0 bottom-0 left-0 p-4 ${
           isVisible 
             ? 'opacity-100 translate-y-0 pointer-events-auto visible' 
-            : 'opacity-0 translate-y-8 pointer-events-none invisible'
+            : 'opacity-0 translate-y-full pointer-events-none invisible'
         }`}
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
     >
-      <form onSubmit={handleSubmit} className={`relative w-full flex bg-surface/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden transition-all ring-2 ring-white/10 focus-within:ring-white/30`}>
+      <form 
+        onSubmit={handleSubmit} 
+        className={`relative w-full flex bg-surface/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-white/10 focus-within:ring-white/30 max-w-2xl mx-auto`}
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Left Column: Input and Previews */}
-        <div className="flex-1 flex flex-col justify-center py-2 pl-4 pr-1">
+        <div className="flex-1 flex flex-col justify-center py-3 pl-4 pr-1">
             {/* Image Preview Area */}
             {selectedImages.length > 0 && (
               <div className="flex gap-2 mb-2 overflow-x-auto py-2 no-scrollbar">

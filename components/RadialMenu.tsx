@@ -190,7 +190,10 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   // --- Handlers ---
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
+    e.preventDefault(); // Prevent default touch actions
+    e.stopPropagation(); // Stop propagation
+
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
     
     isLongPressRef.current = false;
     const target = e.currentTarget as HTMLElement;
@@ -223,6 +226,9 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
     }
@@ -239,8 +245,6 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
             if (item) {
                 handleItemClick(item.action);
             }
-        } else {
-            // Released in void -> Keep open (User can then press X or backdrop)
         }
     } else {
         // Was a short tap
@@ -319,7 +323,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                             {/* Icon */}
                             <button
                                 data-menu-id={item.id}
-                                onClick={() => handleItemClick(item.action)}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleItemClick(item.action); }}
                                 className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl border border-white/10 transition-transform duration-200 ${item.bgColor || 'bg-surface'} text-white ${isHovered ? 'scale-125 ring-2 ring-white/50 z-20' : 'hover:scale-110 z-10'}`}
                             >
                                 <item.icon size={20} className={item.color} fill={item.id === 'action_favorite' && isCurrentSessionFavorite ? "currentColor" : "none"} />
@@ -340,7 +344,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                             {/* Icon */}
                             <button
                                 data-menu-id={item.id}
-                                onClick={() => handleItemClick(item.action)}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleItemClick(item.action); }}
                                 className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl border border-white/10 transition-transform duration-200 ${item.bgColor || 'bg-surface'} text-white ${isHovered ? 'scale-125 ring-2 ring-white/50 z-20' : 'hover:scale-110 z-10'}`}
                             >
                                 <item.icon size={20} className={item.color} />
@@ -356,6 +360,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 onContextMenu={(e) => e.preventDefault()}
                 style={{ touchAction: 'none' }}
                 className={`relative z-30 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90 ${mainBtnBg}`}
