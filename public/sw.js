@@ -1,5 +1,5 @@
-// Nano Studio Service Worker v2
-const CACHE_NAME = 'nano-studio-v2';
+// Nano Studio Service Worker v3
+const CACHE_NAME = 'nano-studio-v3';
 
 // Install event: Skip waiting to activate immediately
 self.addEventListener('install', (event) => {
@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event: Network first, fall back to nothing (for now) to avoid stale cache issues
+// Fetch event: Network first
 // This ensures that if index.html or js files change, we get them fresh.
 self.addEventListener('fetch', (event) => {
   event.respondWith(
