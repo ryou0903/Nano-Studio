@@ -246,12 +246,19 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                 handleItemClick(item.action);
             }
         }
+        setIsOpen(false); // Close menu after drag
     } else {
-        // Was a short tap
+        // Was a short tap. 
+        // We do NOT handle the click here to avoid double-firing if a native click follows.
+        // But if the native click DOESN'T fire (e.g. because we did preventDefault), we must handle it here or in onClick.
+        // Since we did e.preventDefault(), the 'click' event might be suppressed on some browsers.
+        // However, to be safe and consistent, we'll manually trigger click logic here if it's NOT a long press,
+        // and rely on the fact that we stopped propagation.
+        
         if (isOpen) {
-            setIsOpen(false); // Close if already open
+            setIsOpen(false);
         } else {
-            handleClick(); // Open Input or Selection Action
+             handleClick();
         }
     }
     
@@ -360,7 +367,12 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onClick={(e) => { 
+                    // We handle click logic in pointerUp/pointerDown to distinguish long press.
+                    // Just prevent default here to avoid double firing if the browser decides to fire click anyway.
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                }}
                 onContextMenu={(e) => e.preventDefault()}
                 style={{ touchAction: 'none' }}
                 className={`relative z-30 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90 ${mainBtnBg}`}
