@@ -1,17 +1,17 @@
-// Nano Studio Service Worker v20 (Manifest Fix)
-const CACHE_NAME = 'nano-studio-v20';
+// Nano Studio Service Worker v21 (Final Root Fix)
+const CACHE_NAME = 'nano-studio-v21';
 
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json?v=21.0.0'
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Precaching core assets');
+      console.log('Precaching core assets v21');
       return cache.addAll(urlsToCache);
     })
   );

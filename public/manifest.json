@@ -1,5 +1,5 @@
 {
-  "id": "nano-studio-ai-pwa-v20",
+  "id": "nano-studio-v21-final-root-fix",
   "short_name": "Nano Studio",
   "name": "Nano Studio AI",
   "icons": [
@@ -16,8 +16,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./?source=pwa",
-  "scope": "./",
+  "start_url": "index.html?source=pwa",
+  "scope": ".",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#09090b",

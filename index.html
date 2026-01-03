@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Nano Studio</title>
 
-    <!-- Path Guard: Aggressive redirection from /assets/ subfolder -->
+    <!-- Path Guard: CRITICAL - Run before everything to fix incorrect PWA start paths -->
     <script>
       (function() {
         const path = window.location.pathname;
-        if (path.indexOf('/assets/') !== -1) {
-          // Force root path relative to the repo name if possible, or just go up one level from assets
-          console.warn('[Nano Studio] Path Guard: Detected /assets/ in path. Redirecting...');
-          // Replace /assets/ (and anything after it) with /
-          const newPath = path.replace(/\/assets\/.*$/, '/').replace(/\/assets\/?$/, '/');
-          window.location.replace(newPath + window.location.search);
+        // Check if we are inside an "assets" or "public" subfolder which should never be the entry point
+        if (path.includes('/assets/') || path.endsWith('/assets')) {
+          console.warn('[Nano Studio] Path Guard: Incorrect subfolder detected. Redirecting to root...');
+          // Calculate the correct root path by removing 'assets/' from the end of the directory path
+          const segments = path.split('/');
+          const assetsIndex = segments.lastIndexOf('assets');
+          if (assetsIndex !== -1) {
+            const newPath = segments.slice(0, assetsIndex).join('/') + '/';
+            window.location.replace(newPath + window.location.search);
+          }
         }
       })();
     </script>
     
-    <!-- PWA Settings: Reverted to manifest.json with version query for cache busting -->
-    <link rel="manifest" href="./manifest.json?v=20.0.1" />
+    <!-- PWA Settings: Incremented version to force update -->
+    <link rel="manifest" href="./manifest.json?v=21.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -111,17 +115,15 @@
           if (!window.location.protocol.startsWith('http')) return;
 
           try {
-            // Unregister existing workers to ensure new manifest is picked up
+            // Unregister old workers to force fresh installation
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (const registration of registrations) {
-               // Optional: only unregister if scope seems wrong, but for this fix we unregister all
-               // to force a clean re-install of the PWA logic.
                await registration.unregister();
             }
 
             // Register new SW
-            const newRegistration = await navigator.serviceWorker.register('./sw.js');
-            console.log('[Nano Studio] SW registered:', newRegistration.scope);
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=21');
+            console.log('[Nano Studio] SW v21 registered:', newRegistration.scope);
             
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
