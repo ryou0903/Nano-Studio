@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // GitHub Pagesのリポジトリ名に合わせてベースパスを固定します。
-  // これにより、assetsファイルへのパス切れ（404）や白い画面の問題を防ぎます。
-  base: '/Nano-Studio/', 
+  // Use relative base path to ensure the app works in any subdirectory (GitHub Pages)
+  // or at the root (Preview/Dev environments), preventing 404s and redirect issues.
+  base: './', 
   build: {
     outDir: 'dist',
     target: 'esnext'
