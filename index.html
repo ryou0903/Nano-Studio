@@ -5,20 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Nano Studio</title>
 
-    <!-- Path Guard: If the browser somehow lands in /assets/ folder, redirect back to root -->
+    <!-- Path Guard: Aggressive redirection from /assets/ subfolder -->
     <script>
       (function() {
         const path = window.location.pathname;
-        if (path.includes('/assets/')) {
-          const newPath = path.replace(/\/assets\/?$/, '/').replace(/\/assets\/(index\.html)?/, '/');
-          console.warn('[Nano Studio] Path Guard: Redirecting from assets to root:', newPath);
+        if (path.indexOf('/assets/') !== -1) {
+          // Force root path relative to the repo name if possible, or just go up one level from assets
+          console.warn('[Nano Studio] Path Guard: Detected /assets/ in path. Redirecting...');
+          // Replace /assets/ (and anything after it) with /
+          const newPath = path.replace(/\/assets\/.*$/, '/').replace(/\/assets\/?$/, '/');
           window.location.replace(newPath + window.location.search);
         }
       })();
     </script>
     
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=18.0.0" />
+    <!-- PWA Settings: Renamed to app.webmanifest to break cache -->
+    <link rel="manifest" href="app.webmanifest?v=19.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -105,20 +107,21 @@
     <!-- Script for PWA Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          if (!window.location.protocol.startsWith('http')) {
-             console.info('[Nano Studio] Service Worker registration skipped: Unsupported protocol (' + window.location.protocol + ').');
-             return;
-          }
+        window.addEventListener('load', async () => {
+          if (!window.location.protocol.startsWith('http')) return;
 
           try {
-             // Explicitly relative to the root to ensure it stays outside of /assets/
-             navigator.serviceWorker.register('./sw.js')
-               .then(registration => {
-                 console.log('[Nano Studio] SW registered:', registration.scope);
-               }).catch(registrationError => {
-                 console.warn('[Nano Studio] SW registration failed:', registrationError);
-               });
+            // EMERGENCY: Unregister ALL existing service workers to clear the 'assets' scope pollution
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+               console.log('[Nano Studio] Unregistering old SW:', registration.scope);
+               await registration.unregister();
+            }
+
+            // Register new SW with correct scope
+            const newRegistration = await navigator.serviceWorker.register('./sw.js');
+            console.log('[Nano Studio] New SW registered:', newRegistration.scope);
+            
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }
