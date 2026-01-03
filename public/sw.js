@@ -1,11 +1,11 @@
-// Nano Studio Service Worker v22 (Absolute Rescue)
-const CACHE_NAME = 'nano-studio-v22';
+// Nano Studio Service Worker v23 (Icon Fix)
+const CACHE_NAME = 'nano-studio-v23';
 
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
-  './manifest.json?v=22.0.0'
+  './manifest.json?v=23.0.0'
 ];
 
 self.addEventListener('install', (event) => {

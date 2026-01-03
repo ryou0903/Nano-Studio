@@ -1,25 +1,25 @@
 {
-  "id": "nano-studio-v22-absolute-reset-fix",
+  "id": "nano-studio-v23-release",
   "short_name": "Nano Studio",
   "name": "Nano Studio AI",
+  "description": "Gemini Nano Bananaモデルを搭載した強力なAI画像生成ギャラリー。",
   "icons": [
     {
       "src": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
       "type": "image/svg+xml",
-      "sizes": "192x192",
-      "purpose": "any maskable"
+      "sizes": "any",
+      "purpose": "any"
     },
     {
       "src": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
       "type": "image/svg+xml",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "sizes": "any",
+      "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#09090b",
   "background_color": "#09090b",
   "orientation": "portrait"

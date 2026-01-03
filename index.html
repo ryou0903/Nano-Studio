@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Nano Studio</title>
 
-    <!-- Path Guard: Extra layer of protection inside the app -->
+    <!-- Path Guard: Immediate redirection if loaded from incorrect subdirectories -->
     <script>
       (function() {
+        // Current path
         var path = window.location.pathname;
-        if (path.includes('/assets/')) {
-          var segments = path.split('/');
-          var assetsIndex = segments.lastIndexOf('assets');
-          if (assetsIndex !== -1) {
-            var newPath = segments.slice(0, assetsIndex).join('/') + '/';
-            window.location.replace(newPath + window.location.search);
+        
+        // If we are in /assets/ or /public/, redirect to root immediately
+        if (path.indexOf('/assets/') !== -1 || path.indexOf('/public/') !== -1) {
+          // Attempt to find the repository root (assumes simple structure like /RepoName/assets/...)
+          // We strip everything after the repo name.
+          var newPath = path.replace(/\/assets\/.*$/, '/').replace(/\/public\/.*$/, '/');
+          
+          // Fallback: If replacement didn't change anything (complex path), go to relative root
+          if (newPath === path) {
+             newPath = './';
           }
+          
+          window.location.replace(newPath + window.location.search);
         }
       })();
     </script>
     
-    <!-- PWA Settings: v22 -->
-    <link rel="manifest" href="./manifest.json?v=22.0.0" />
+    <!-- PWA Settings: v23 -->
+    <link rel="manifest" href="./manifest.json?v=23.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -110,12 +117,13 @@
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
           try {
+            // Unregister old workers to ensure fresh start
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (const registration of registrations) {
                await registration.unregister();
             }
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=22');
-            console.log('[Nano Studio] SW v22 registered');
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=23');
+            console.log('[Nano Studio] SW v23 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }
