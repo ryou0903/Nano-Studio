@@ -1,12 +1,12 @@
-// Nano Studio Service Worker v26 (PNG Fix)
-const CACHE_NAME = 'nano-studio-v26';
+// Nano Studio Service Worker v27 (Banana Icon)
+const CACHE_NAME = 'nano-studio-v27';
 
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
   './icon.svg',
-  './manifest.json?v=26.0.0'
+  './manifest.json?v=27.0.0'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,6 +33,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Navigation requests: always serve index.html
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -43,8 +46,11 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
+  // Static assets
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+      // Return cached response or fetch from network
       return cachedResponse || fetch(event.request);
     })
   );

@@ -9,7 +9,6 @@
     <script>
       (function() {
         var path = window.location.pathname;
-        // Only redirect if we are deep in assets/public which shouldn't happen in PWA root
         if (path.indexOf('/assets/') !== -1 || path.indexOf('/public/') !== -1) {
           var newPath = path.replace(/\/assets\/.*$/, '/').replace(/\/public\/.*$/, '/');
           if (newPath === path) newPath = './';
@@ -18,9 +17,9 @@
       })();
     </script>
     
-    <!-- PWA Settings: v26 -->
-    <link rel="manifest" href="./manifest.json?v=26.0.0" />
-    <meta name="theme-color" content="#09090b" />
+    <!-- PWA Settings: v27 -->
+    <link rel="manifest" href="./manifest.json?v=27.0.0" />
+    <meta name="theme-color" content="#18181b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Nano Studio" />
@@ -113,8 +112,8 @@
             for (const registration of registrations) {
                await registration.unregister();
             }
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=26');
-            console.log('[Nano Studio] SW v26 registered');
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=27');
+            console.log('[Nano Studio] SW v27 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }
