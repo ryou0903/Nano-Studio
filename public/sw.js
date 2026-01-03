@@ -1,10 +1,10 @@
-// Nano Studio Service Worker v19 (Manifest Rename Fix)
-const CACHE_NAME = 'nano-studio-v19';
+// Nano Studio Service Worker v20 (Manifest Fix)
+const CACHE_NAME = 'nano-studio-v20';
 
 const urlsToCache = [
   './',
   './index.html',
-  './app.webmanifest'
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
