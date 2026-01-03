@@ -6,7 +6,7 @@
     <title>Nano Studio</title>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=15.0.0" />
+    <link rel="manifest" href="manifest.json?v=16.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -94,22 +94,13 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // 1. Check protocol support
-          // Some environments (like previews) serve the app over 'blob:' or 'file:', 
-          // which don't support Service Workers. We skip registration in these cases
-          // to prevent errors and explicitly log this behavior.
           if (!window.location.protocol.startsWith('http')) {
              console.info('[Nano Studio] Service Worker registration skipped: Unsupported protocol (' + window.location.protocol + '). This is expected in preview environments.');
              return;
           }
 
           try {
-             // 2. Construct absolute URL based on current location
-             // This ensures we always look for sw.js relative to the current page,
-             // regardless of how the environment handles base paths.
              const swUrl = new URL('sw.js', window.location.href).href;
-             
-             // 3. Define scope explicitly
              const scope = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
              navigator.serviceWorker.register(swUrl, { scope: scope })
@@ -124,7 +115,6 @@
         });
       }
     </script>
-    <!-- Entry point for Vite. Use relative path to work with base config -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>

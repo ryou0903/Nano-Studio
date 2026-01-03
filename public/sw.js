@@ -1,8 +1,9 @@
-// Nano Studio Service Worker v15 (Protocol Guard)
-const CACHE_NAME = 'nano-studio-v15';
+// Nano Studio Service Worker v16 (Directory-based Routing)
+const CACHE_NAME = 'nano-studio-v16';
 
-// Use relative paths. The browser resolves these relative to sw.js location.
+// Cache the root directory instead of the filename to align with manifest start_url
 const urlsToCache = [
+  './',
   './index.html',
   './manifest.json'
 ];
@@ -32,12 +33,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // 1. Navigation Requests (The "App Shell")
+  // Navigation Requests: Serve the cached root for any sub-path navigation if offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // Network failed (Offline). Return the cached index.html.
-        return caches.match('./index.html').then(response => {
+        // Return cached root or index
+        return caches.match('./').then(response => {
+            return response || caches.match('./index.html');
+        }).then(response => {
             if (response) return response;
             return new Response("Offline. Please reload.", { headers: { "Content-Type": "text/plain" } });
         });
@@ -46,7 +49,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Static Assets
+  // Static Assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
