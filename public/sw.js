@@ -1,12 +1,13 @@
-// Nano Studio Service Worker v27 (Banana Icon)
-const CACHE_NAME = 'nano-studio-v27';
+// Nano Studio Service Worker v29 (Dual PNG Icons)
+const CACHE_NAME = 'nano-studio-v29';
 
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
-  './icon.svg',
-  './manifest.json?v=27.0.0'
+  './icon-192.png',
+  './icon-512.png',
+  './manifest.json?v=29.0.0'
 ];
 
 self.addEventListener('install', (event) => {
