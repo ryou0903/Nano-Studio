@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid slice">
+  <rect width="512" height="512" fill="#09090b"/>
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
@@ -6,7 +7,6 @@
       <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="120" fill="#09090b"/>
-  <path fill="url(#grad)" d="M256 80c0 0-40 136-176 176 136 40 176 176 176 176s40-136 176-176c-136-40-176-176-176-176z"/>
-  <path fill="#ffffff" opacity="0.8" d="M380 80c0 0-15 45-60 60 45 15 60 60 60 60s15-45 60-60c-45-15-60-60-60-60z"/>
+  <path fill="url(#grad)" d="M256 96c0 0-40 128-160 160 120 32 160 160 160 160s40-128 160-160c-120-32-160-160-160-160z"/>
+  <path fill="#ffffff" opacity="0.9" d="M370 100c0 0-15 40-50 50 35 10 50 50 50 50s15-40 50-50c-35-10-50-50-50-50z"/>
 </svg>

@@ -1,12 +1,12 @@
-// Nano Studio Service Worker v25 (Local Icon Fix)
-const CACHE_NAME = 'nano-studio-v25';
+// Nano Studio Service Worker v26 (PNG Fix)
+const CACHE_NAME = 'nano-studio-v26';
 
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
   './icon.svg',
-  './manifest.json?v=25.0.0'
+  './manifest.json?v=26.0.0'
 ];
 
 self.addEventListener('install', (event) => {
