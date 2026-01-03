@@ -1,11 +1,12 @@
-// Nano Studio Service Worker v24 (Query Ignore & PNG)
-const CACHE_NAME = 'nano-studio-v24';
+// Nano Studio Service Worker v25 (Local Icon Fix)
+const CACHE_NAME = 'nano-studio-v25';
 
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
-  './manifest.json?v=24.0.0'
+  './icon.svg',
+  './manifest.json?v=25.0.0'
 ];
 
 self.addEventListener('install', (event) => {
@@ -32,11 +33,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Navigation requests: always try network first, fall back to cached index.html
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // CRITICAL FIX: ignoreSearch: true handles ?source=pwa or other query params
         return caches.match('./index.html', { ignoreSearch: true }).then(response => {
             return response || caches.match('./', { ignoreSearch: true });
         });
@@ -44,8 +43,6 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Asset requests
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
