@@ -1,5 +1,5 @@
-// Nano Studio Service Worker v17
-const CACHE_NAME = 'nano-studio-v17';
+// Nano Studio Service Worker v18 (Directory Guard)
+const CACHE_NAME = 'nano-studio-v18';
 
 const urlsToCache = [
   './',

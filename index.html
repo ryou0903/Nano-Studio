@@ -4,9 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Nano Studio</title>
+
+    <!-- Path Guard: If the browser somehow lands in /assets/ folder, redirect back to root -->
+    <script>
+      (function() {
+        const path = window.location.pathname;
+        if (path.includes('/assets/')) {
+          const newPath = path.replace(/\/assets\/?$/, '/').replace(/\/assets\/(index\.html)?/, '/');
+          console.warn('[Nano Studio] Path Guard: Redirecting from assets to root:', newPath);
+          window.location.replace(newPath + window.location.search);
+        }
+      })();
+    </script>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=17.0.0" />
+    <link rel="manifest" href="manifest.json?v=18.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -94,16 +106,14 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Standard protocol check
           if (!window.location.protocol.startsWith('http')) {
-             console.info('[Nano Studio] Service Worker registration skipped: Unsupported protocol (' + window.location.protocol + '). This is expected in preview environments.');
+             console.info('[Nano Studio] Service Worker registration skipped: Unsupported protocol (' + window.location.protocol + ').');
              return;
           }
 
           try {
-             // Registering 'sw.js' directly as it is guaranteed to be in the same folder as index.html
-             // The scope will automatically default to the directory of sw.js.
-             navigator.serviceWorker.register('sw.js')
+             // Explicitly relative to the root to ensure it stays outside of /assets/
+             navigator.serviceWorker.register('./sw.js')
                .then(registration => {
                  console.log('[Nano Studio] SW registered:', registration.scope);
                }).catch(registrationError => {
