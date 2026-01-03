@@ -17,8 +17,8 @@
       })();
     </script>
     
-    <!-- PWA Settings: v30 (Cache Busting) -->
-    <link rel="manifest" href="./manifest.json?v=30.0.1" />
+    <!-- PWA Settings: v31 (Switch to .webmanifest) -->
+    <link rel="manifest" href="./site.webmanifest?v=31.0.0" />
     <meta name="theme-color" content="#18181b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -110,27 +110,20 @@
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
           try {
-            // Unregister old workers to force update
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (const registration of registrations) {
-               // We don't unregister here aggressively every time, 
-               // but the new file ?v=30 registration below triggers the update cycle.
-            }
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=30');
+            // Force re-registration to pick up v31
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=31');
             
-            // Force update check
             newRegistration.onupdatefound = () => {
                 const installingWorker = newRegistration.installing;
                 installingWorker.onstatechange = () => {
                     if (installingWorker.state === 'installed') {
                         if (navigator.serviceWorker.controller) {
                             console.log('[Nano Studio] New content available, reloading...');
-                            // Optional: window.location.reload(); 
+                             window.location.reload(); 
                         }
                     }
                 };
             };
-            console.log('[Nano Studio] SW v30 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }

@@ -1,18 +1,17 @@
-// Nano Studio Service Worker v30 (Cache Busting)
-const CACHE_NAME = 'nano-studio-v30';
+// Nano Studio Service Worker v31 (WebAPK Fix)
+const CACHE_NAME = 'nano-studio-v31';
 
-// Explicitly list the PNGs to force them into cache
 const urlsToCache = [
   './',
   './index.html',
   './404.html',
   './icon-192.png',
   './icon-512.png',
-  './manifest.json?v=30.0.1'
+  './site.webmanifest?v=31.0.0'
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Force activate immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
@@ -25,19 +24,17 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-            // Delete ALL old caches that don't match v30
             if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.log('[SW] Clearing old cache:', cacheName);
               return caches.delete(cacheName);
             }
         })
       );
-    }).then(() => self.clients.claim()) // Take control immediately
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  // Navigation requests: always serve index.html
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -49,10 +46,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      // Return cached response or fetch from network
       return cachedResponse || fetch(event.request);
     })
   );
