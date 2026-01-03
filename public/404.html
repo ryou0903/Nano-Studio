@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Nano Studio - Redirecting...</title>
+    <script type="text/javascript">
+      // GitHub Pages 404 Redirect Script
+      // If the PWA tries to open /assets/ which doesn't exist, this script will catch it.
+      var path = window.location.pathname;
+      var search = window.location.search;
+      
+      console.warn("404 detected at: " + path);
+      
+      // Check if we are in a subfolder that shouldn't exist (like 'assets')
+      if (path.includes('/assets/')) {
+        // Calculate the correct root (e.g., /Nano-Studio/)
+        var segments = path.split('/');
+        var assetsIndex = segments.lastIndexOf('assets');
+        if (assetsIndex !== -1) {
+          var newPath = segments.slice(0, assetsIndex).join('/') + '/';
+          // Force redirect to the real root
+          window.location.replace(newPath + search);
+        }
+      } else {
+        // Fallback: just go to the parent directory
+        window.location.replace('./' + search);
+      }
+    </script>
+  </head>
+  <body>
+    Redirecting to Nano Studio...
+  </body>
+</html>

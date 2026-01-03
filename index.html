@@ -5,26 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Nano Studio</title>
 
-    <!-- Path Guard: CRITICAL - Run before everything to fix incorrect PWA start paths -->
+    <!-- Path Guard: Extra layer of protection inside the app -->
     <script>
       (function() {
-        const path = window.location.pathname;
-        // Check if we are inside an "assets" or "public" subfolder which should never be the entry point
-        if (path.includes('/assets/') || path.endsWith('/assets')) {
-          console.warn('[Nano Studio] Path Guard: Incorrect subfolder detected. Redirecting to root...');
-          // Calculate the correct root path by removing 'assets/' from the end of the directory path
-          const segments = path.split('/');
-          const assetsIndex = segments.lastIndexOf('assets');
+        var path = window.location.pathname;
+        if (path.includes('/assets/')) {
+          var segments = path.split('/');
+          var assetsIndex = segments.lastIndexOf('assets');
           if (assetsIndex !== -1) {
-            const newPath = segments.slice(0, assetsIndex).join('/') + '/';
+            var newPath = segments.slice(0, assetsIndex).join('/') + '/';
             window.location.replace(newPath + window.location.search);
           }
         }
       })();
     </script>
     
-    <!-- PWA Settings: Incremented version to force update -->
-    <link rel="manifest" href="./manifest.json?v=21.0.0" />
+    <!-- PWA Settings: v22 -->
+    <link rel="manifest" href="./manifest.json?v=22.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -108,23 +105,17 @@
 </head>
   <body>
     <div id="root"></div>
-    <!-- Script for PWA Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
-
           try {
-            // Unregister old workers to force fresh installation
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (const registration of registrations) {
                await registration.unregister();
             }
-
-            // Register new SW
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=21');
-            console.log('[Nano Studio] SW v21 registered:', newRegistration.scope);
-            
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=22');
+            console.log('[Nano Studio] SW v22 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }

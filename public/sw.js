@@ -1,17 +1,17 @@
-// Nano Studio Service Worker v21 (Final Root Fix)
-const CACHE_NAME = 'nano-studio-v21';
+// Nano Studio Service Worker v22 (Absolute Rescue)
+const CACHE_NAME = 'nano-studio-v22';
 
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json?v=21.0.0'
+  './404.html',
+  './manifest.json?v=22.0.0'
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Precaching core assets v21');
       return cache.addAll(urlsToCache);
     })
   );
@@ -37,15 +37,11 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request).catch(() => {
         return caches.match('./').then(response => {
             return response || caches.match('./index.html');
-        }).then(response => {
-            if (response) return response;
-            return new Response("Offline. Please reload.", { headers: { "Content-Type": "text/plain" } });
         });
       })
     );
     return;
   }
-
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
