@@ -8,32 +8,22 @@
     <!-- Path Guard: Immediate redirection if loaded from incorrect subdirectories -->
     <script>
       (function() {
-        // Current path
         var path = window.location.pathname;
-        
-        // If we are in /assets/ or /public/, redirect to root immediately
         if (path.indexOf('/assets/') !== -1 || path.indexOf('/public/') !== -1) {
-          // Attempt to find the repository root (assumes simple structure like /RepoName/assets/...)
-          // We strip everything after the repo name.
           var newPath = path.replace(/\/assets\/.*$/, '/').replace(/\/public\/.*$/, '/');
-          
-          // Fallback: If replacement didn't change anything (complex path), go to relative root
-          if (newPath === path) {
-             newPath = './';
-          }
-          
+          if (newPath === path) newPath = './';
           window.location.replace(newPath + window.location.search);
         }
       })();
     </script>
     
-    <!-- PWA Settings: v23 -->
-    <link rel="manifest" href="./manifest.json?v=23.0.0" />
+    <!-- PWA Settings: v24 -->
+    <link rel="manifest" href="./manifest.json?v=24.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Nano Studio" />
-    <link rel="apple-touch-icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" />
+    <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/gemini_gradient_icon_512dp.png" />
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -117,13 +107,12 @@
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
           try {
-            // Unregister old workers to ensure fresh start
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (const registration of registrations) {
                await registration.unregister();
             }
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=23');
-            console.log('[Nano Studio] SW v23 registered');
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=24');
+            console.log('[Nano Studio] SW v24 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }
