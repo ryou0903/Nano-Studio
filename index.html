@@ -17,12 +17,13 @@
       })();
     </script>
     
-    <!-- PWA Settings: v29 -->
-    <link rel="manifest" href="./manifest.json?v=29.0.0" />
+    <!-- PWA Settings: v30 (Cache Busting) -->
+    <link rel="manifest" href="./manifest.json?v=30.0.1" />
     <meta name="theme-color" content="#18181b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Nano Studio" />
+    
     <!-- Use 192px for iOS and Favicon -->
     <link rel="apple-touch-icon" href="./icon-192.png" />
     <link rel="icon" type="image/png" href="./icon-192.png" />
@@ -109,12 +110,27 @@
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
           try {
+            // Unregister old workers to force update
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (const registration of registrations) {
-               await registration.unregister();
+               // We don't unregister here aggressively every time, 
+               // but the new file ?v=30 registration below triggers the update cycle.
             }
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=29');
-            console.log('[Nano Studio] SW v29 registered');
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=30');
+            
+            // Force update check
+            newRegistration.onupdatefound = () => {
+                const installingWorker = newRegistration.installing;
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('[Nano Studio] New content available, reloading...');
+                            // Optional: window.location.reload(); 
+                        }
+                    }
+                };
+            };
+            console.log('[Nano Studio] SW v30 registered');
           } catch (e) {
              console.warn('[Nano Studio] SW setup failed:', e);
           }
