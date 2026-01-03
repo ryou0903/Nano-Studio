@@ -1,5 +1,5 @@
 {
-  "id": "./",
+  "id": "nano-studio-ai-pwa",
   "short_name": "Nano Studio",
   "name": "Nano Studio AI",
   "icons": [
@@ -16,7 +16,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./?source=pwa",
+  "start_url": "index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],

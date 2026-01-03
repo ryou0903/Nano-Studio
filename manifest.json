@@ -1,5 +1,5 @@
 {
-  "id": "./",
+  "id": "nano-studio-ai-pwa",
   "short_name": "Nano Studio",
   "name": "Nano Studio AI",
   "icons": [
@@ -9,7 +9,7 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "./?source=pwa",
+  "start_url": "index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#09090b",

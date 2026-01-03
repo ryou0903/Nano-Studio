@@ -1,7 +1,6 @@
-// Nano Studio Service Worker v16 (Directory-based Routing)
-const CACHE_NAME = 'nano-studio-v16';
+// Nano Studio Service Worker v17
+const CACHE_NAME = 'nano-studio-v17';
 
-// Cache the root directory instead of the filename to align with manifest start_url
 const urlsToCache = [
   './',
   './index.html',
@@ -33,11 +32,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Navigation Requests: Serve the cached root for any sub-path navigation if offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // Return cached root or index
         return caches.match('./').then(response => {
             return response || caches.match('./index.html');
         }).then(response => {
@@ -49,7 +46,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static Assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
