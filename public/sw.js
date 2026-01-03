@@ -1,5 +1,5 @@
-// Nano Studio Service Worker v31 (WebAPK Fix)
-const CACHE_NAME = 'nano-studio-v31';
+// Nano Studio Service Worker v32 (Icon Fix)
+const CACHE_NAME = 'nano-studio-v32';
 
 const urlsToCache = [
   './',
@@ -7,7 +7,7 @@ const urlsToCache = [
   './404.html',
   './icon-192.png',
   './icon-512.png',
-  './site.webmanifest?v=31.0.0'
+  './site.webmanifest?v=32.0.0'
 ];
 
 self.addEventListener('install', (event) => {

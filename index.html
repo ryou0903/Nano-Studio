@@ -17,8 +17,8 @@
       })();
     </script>
     
-    <!-- PWA Settings: v31 (Switch to .webmanifest) -->
-    <link rel="manifest" href="./site.webmanifest?v=31.0.0" />
+    <!-- PWA Settings: v32 (Fix Icon) -->
+    <link rel="manifest" href="./site.webmanifest?v=32.0.0" />
     <meta name="theme-color" content="#18181b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -110,8 +110,8 @@
         window.addEventListener('load', async () => {
           if (!window.location.protocol.startsWith('http')) return;
           try {
-            // Force re-registration to pick up v31
-            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=31');
+            // Force re-registration to pick up v32
+            const newRegistration = await navigator.serviceWorker.register('./sw.js?v=32');
             
             newRegistration.onupdatefound = () => {
                 const installingWorker = newRegistration.installing;
