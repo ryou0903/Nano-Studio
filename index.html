@@ -6,7 +6,7 @@
     <title>Nano Studio</title>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=6.0.0" />
+    <link rel="manifest" href="manifest.json?v=7.0.0" />
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -94,7 +94,8 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js', { scope: '/Nano-Studio/' })
+          // Register using relative scope './' to adapt to any path (Preview or GitHub Pages)
+          navigator.serviceWorker.register('sw.js', { scope: './' })
             .then(registration => {
               console.log('SW registered with scope:', registration.scope);
             }).catch(registrationError => {

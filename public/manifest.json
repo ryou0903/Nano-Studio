@@ -1,5 +1,5 @@
 {
-  "id": "/Nano-Studio/",
+  "id": "./",
   "short_name": "Nano Studio",
   "name": "Nano Studio AI",
   "icons": [
@@ -17,7 +17,7 @@
     }
   ],
   "start_url": "./index.html?source=pwa",
-  "scope": "/Nano-Studio/",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#09090b",

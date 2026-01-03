@@ -1,18 +1,21 @@
-// Nano Studio Service Worker v6 (Strict Offline)
-const CACHE_NAME = 'nano-studio-v6';
-const SCOPE = '/Nano-Studio/';
-const INDEX_HTML_URL = SCOPE + 'index.html';
+// Nano Studio Service Worker v7 (Universal Path)
+// Dynamically determine the scope to support both GitHub Pages (/Nano-Studio/) and Dev/Preview (/)
+const SCOPE = self.registration.scope;
+const CACHE_NAME = 'nano-studio-v7';
+
+// Construct the absolute URL for index.html based on the dynamic scope
+const INDEX_HTML_URL = new URL('index.html', SCOPE).href;
 
 const PRECACHE_URLS = [
   INDEX_HTML_URL,
-  SCOPE + 'manifest.json'
+  new URL('manifest.json', SCOPE).href
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Precaching core assets');
+      console.log('Precaching core assets for scope:', SCOPE);
       return cache.addAll(PRECACHE_URLS);
     })
   );
@@ -35,23 +38,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Rescue: Redirect stray 'assets/index.html' requests to root
-  if (url.pathname.includes('/assets/index.html')) {
-    event.respondWith(Response.redirect(SCOPE, 301));
+  // 1. Rescue: Redirect stray 'assets/index.html' requests
+  // We use endsWith to catch it regardless of the base path
+  if (url.pathname.endsWith('/assets/index.html')) {
+    event.respondWith(Response.redirect(INDEX_HTML_URL, 301));
     return;
   }
 
   // 2. Navigation Requests (The "App Shell")
-  // If it's a page load, we MUST return index.html to satisfy PWA criteria,
-  // even if offline or if URL has query params like ?source=pwa
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // Network failed (Offline). Return the cached index.html explicitly.
-        // We ignore the actual URL params and serve the shell.
+        // Network failed (Offline). Return the cached index.html.
         return caches.match(INDEX_HTML_URL).then(response => {
             if (response) return response;
-            // Fallback for extreme edge cases
             return new Response("Offline. Please reload.", { headers: { "Content-Type": "text/plain" } });
         });
       })
@@ -59,10 +59,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static Assets (Images, Scripts)
+  // 3. Static Assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Return cached response if found, otherwise fetch from network
       return cachedResponse || fetch(event.request);
     })
   );
